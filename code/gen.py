@@ -3,6 +3,7 @@ import os, cv2, lmdb
 import numpy as np
 import pickle
 import random
+from PIL import Image
 
 #Plans: 1. add augmentation option
 #Plans: 4. 
@@ -134,9 +135,9 @@ class ImageTextAnnotBatchGen(RNGDataFlow):
 		return nbSamples
 
 	def _list_entries(self):
-		lmdb_path = self.data_path['lmdb']
-		lmdb_env = lmdb.open(lmdb_path, map_size=int(1e11), readonly=True, lock=False)
-		self.txn = lmdb_env.begin(write=False)
+		# lmdb_path = self.data_path['lmdb']
+		# lmdb_env = lmdb.open(lmdb_path, map_size=int(1e11), readonly=True, lock=False)
+		# self.txn = lmdb_env.begin(write=False)
 
 		annt_path = self.data_path['annotations']
 		with open(annt_path, 'rb') as f:
@@ -167,14 +168,17 @@ class ImageTextAnnotBatchGen(RNGDataFlow):
 			for entry in self.entries:
 				if len(self.annotations[entry]['queries'])==0:
 					continue
-				imgbin = self.txn.get(entry.encode('utf-8'))
-				if imgbin!=None:
-					buff = np.frombuffer(imgbin, dtype='uint8')
-				else:
-					continue
+				# imgbin = self.txn.get(entry.encode('utf-8'))
+				# if imgbin!=None:
+				# 	buff = np.frombuffer(imgbin, dtype='uint8')
+				# else:
+				# 	continue
 			
-				imgbgr = cv2.imdecode(buff, cv2.IMREAD_COLOR)
-				img = cv2.resize(imgbgr[:,:,[2,1,0]], self.img_size)
+				# imgbgr = cv2.imdecode(buff, cv2.IMREAD_COLOR)
+				# img = cv2.resize(imgbgr[:,:,[2,1,0]], self.img_size)
+
+				img_path = self.annotations[entry]['img_path']
+				img = Image.open(img_path)
 
 				if self.per_sen_qry:
 					#return unique sentence with all annotations available

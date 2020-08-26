@@ -46,11 +46,11 @@ class REFER:
 		# e.g., dataset = 'refcoco', splitBy = 'unc'
 		print('loading dataset %s into memory...' % dataset)
 		self.ROOT_DIR = osp.abspath(osp.dirname(__file__))
-		self.DATA_DIR = osp.join(data_root, 'ReferIt_Splits')
+		self.DATA_DIR = osp.join(data_root, dataset)
 		if dataset in ['refcoco', 'refcoco+', 'refcocog']:
-			self.IMAGE_DIR = './coco/COCO_Images'
+			self.IMAGE_DIR = osp.join(data_root, 'images/mscoco/images/train2014')
 		elif dataset == 'refclef':
-			self.IMAGE_DIR = osp.join(data_root, 'RefClef_Images')
+			self.IMAGE_DIR = osp.join(data_root, 'images/saiapr_tc-12')
 		else:
 			print('No refer dataset is called [%s]' % dataset)
 			sys.exit()
@@ -59,6 +59,7 @@ class REFER:
 		tic = time.time()
 		ref_file = osp.join(self.DATA_DIR, 'refs('+splitBy+').p')
 		self.data = {}
+		self.data['dataset'] = dataset
 		self.data['refs'] = pickle.load(open(ref_file, 'rb'))
  
 		# load annotations from data/dataset/instances.json

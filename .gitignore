@@ -102,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Folders
+data/referit/
+data/coco/
+data/flickr30k/
+data/visual_genome/
+code/

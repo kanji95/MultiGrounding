@@ -11,8 +11,8 @@ class Data():
 	def __call__(self,
 				 raw_path,
 				 save_path,
-				 store_lmdb,
 				 name,
+				 store_lmdb=False,
 				 **kwargs):
 
 		name = name.lower()
@@ -25,7 +25,7 @@ class Data():
 		elif name=='visual_genome':
 			self._vg(raw_path,save_path,store_lmdb)
 		elif name=='referit':
-			self._referit(raw_path,save_path,store_lmdb)
+			self._referit(raw_path,save_path)
 
 	def help(self):
 		name = input('Please choose one of the following:\n flickr30k_entities\n coco\n visual_genome\n referit\n\n')
@@ -249,44 +249,45 @@ class Data():
 		if store_lmdb:
 			store_lmdb.close()
 
-	def _get_split_refer(self,splits_path,split):
-		#an internal refer function
-		with open(os.path.join(splits_path, 'referit_'+split+'_imlist.txt')) as f:
-			lines = f.readlines()
-			img_ids = [int(l.strip('\n')) for l in lines]
-		return img_ids
+	# def _get_split_refer(self,splits_path,split):
+	# 	#an internal refer function
+	# 	with open(os.path.join(splits_path, 'referit_'+split+'_imlist.txt')) as f:
+	# 		lines = f.readlines()
+	# 		img_ids = [int(l.strip('\n')) for l in lines]
+	# 	return img_ids
 
-	def _get_dict_refer(self, imgs_path, caps_path, refer_obj, img_ids_all, img_ids_split, store_lmdb):
+	def _get_dict_refer(self, refer_obj, img_ids_all, img_ids_split):
 		#an intternal refer function
 		dictionary = {}
 		for n, img_id in enumerate(img_ids_split):
 			if img_id not in img_ids_all:
 				continue
 			img_file_name = refer_obj.Imgs[img_id]['file_name']
+			img_file_path = os.path.join(refer_obj.IMAGE_DIR, img_file_name)
 			img_obj =  refer_obj.Imgs[img_id]
 			height, width = int(img_obj['height']), int(img_obj['width'])
 
-			cap_file_name = os.path.join(img_file_name.split("/")[0], str(img_id) + '.eng')
-			cap_file_path = os.path.join(caps_path, cap_file_name)
-			cations = []
-			if os.path.exists(cap_file_path):
-				with open(cap_file_path, encoding = "ISO-8859-1") as f:
-					lines = f.readlines()
-					captions = lines[3][13:-16].split(';')
-					captions = [c for c in captions if len(c)>2]
+			# cap_file_name = os.path.join(img_file_name.split("/")[0], str(img_id) + '.eng')
+			# cap_file_path = os.path.join(caps_path, cap_file_name)
+			# cations = []
+			# if os.path.exists(cap_file_path):
+			# 	with open(cap_file_path, encoding = "ISO-8859-1") as f:
+			# 		lines = f.readlines()
+			# 		captions = lines[3][13:-16].split(';')
+			# 		captions = [c for c in captions if len(c)>2]
 
-			if store_lmdb:
-				image = cv2.imread(os.path.join(imgs_path, img_file_name), cv2.IMREAD_COLOR)
-				img_encoded = cv2.imencode('.jpg', image)[1]
+			# if store_lmdb:
+			# 	image = cv2.imread(os.path.join(imgs_path, img_file_name), cv2.IMREAD_COLOR)
+			# 	img_encoded = cv2.imencode('.jpg', image)[1]
 
-				with store_lmdb.begin(write=True) as lmdb_txn:
-					lmdb_txn.put(str(img_id).encode(), img_encoded)
+			# 	with store_lmdb.begin(write=True) as lmdb_txn:
+			# 		lmdb_txn.put(str(img_id).encode(), img_encoded)
 
-				height_i, width_i = image.shape[:2]
-				if int(height_i) != int(height) or int(width_i) != int(width):
-					self.wrong += 1
-					#print('Image H,W mismatch for image_id: '+str(img_id))
-					continue
+			# 	height_i, width_i = image.shape[:2]
+			# 	if int(height_i) != int(height) or int(width_i) != int(width):
+			# 		self.wrong += 1
+			# 		#print('Image H,W mismatch for image_id: '+str(img_id))
+			# 		continue
 			
 
 			refs = refer_obj.imgToRefs[img_id]
@@ -326,27 +327,29 @@ class Data():
 					queries.append(query)
 				
 			dictionary[str(img_id)] = {'image_id': img_id,
-										'size': (height,width,3),
-										'queries': queries,
-										'annotations':annotations,
-										'captions': captions}
+			                           'img_path': img_file_path,
+									   'size': (height,width,3),
+									   'queries': queries,
+									   'annotations':annotations,
+										# 'captions': captions
+									}
 
 			sys.stdout.write('%d/%d \r' %(n+1,len(img_ids_split)))
 			sys.stdout.flush()
 		return dictionary
 
-	def _referit(self,raw_path,save_path,store_lmdb):
-		imgs_path = os.path.join(raw_path,'ReferIt_Images/')
-		splits_path = os.path.join(raw_path,'ReferIt_Splits/')
-		caps_path = os.path.join(raw_path, 'RefClef_Captions/')
+	def _referit(self,raw_path,save_path):
+		# imgs_path = os.path.join(raw_path,'ReferIt_Images/')
+		# splits_path = os.path.join(raw_path,'ReferIt_Splits/')
+		# caps_path = os.path.join(raw_path, 'RefClef_Captions/')
 		annot_dict_path = os.path.join(save_path,'annotations/')
 		os.system('mkdir -p '+annot_dict_path)
 		self.wrong = 0
 
-		if store_lmdb:
-			lmdb_path = os.path.join(save_path,'images.lmdb')
-			lmdb_env = lmdb.open(lmdb_path, map_size=int(1e11), lock=False)
-			store_lmdb = lmdb_env
+		# if store_lmdb:
+		# 	lmdb_path = os.path.join(save_path,'images.lmdb')
+		# 	lmdb_env = lmdb.open(lmdb_path, map_size=int(1e11), lock=False)
+		# 	store_lmdb = lmdb_env
 
 		#initialization
 		dataset = 'refclef'
@@ -354,21 +357,26 @@ class Data():
 		refer_obj = REFER(raw_path, dataset, splitBy)
 		img_ids_all = refer_obj.getImgIds()
 
-		for split in ['train', 'test', 'val']:
-			print('Processing '+split+' split...')
-			img_ids_split = self._get_split_refer(splits_path, split)
-			dict_ = self._get_dict_refer(imgs_path, caps_path, refer_obj, img_ids_all, img_ids_split, store_lmdb)
-			pickle.dump(dict_,open(annot_dict_path+split+'.pickle','wb'),protocol=pickle.HIGHEST_PROTOCOL)
-			if split=='train':
-				train_val_dict_ = dict_
-			elif split=='val':
-				train_val_dict_.update(dict_)
-				pickle.dump(train_val_dict_,open(annot_dict_path+'train_val.pickle','wb'),protocol=pickle.HIGHEST_PROTOCOL)
-			print('\n')
+		split = 'val'
+
+		# for split in ['train', 'test', 'val']:
+		print('Processing '+split+' split...')
+		# img_ids_split = self._get_split_refer(splits_path, split)
+		ref_ids = refer_obj.getRefIds(split=split)
+		img_ids_split = refer_obj.getImgIds(ref_ids=ref_ids)
+
+		dict_ = self._get_dict_refer(refer_obj, img_ids_all, img_ids_split)
+		pickle.dump(dict_,open(annot_dict_path+split+'.pickle','wb'),protocol=pickle.HIGHEST_PROTOCOL)
+		if split=='train':
+			train_val_dict_ = dict_
+		elif split=='val':
+			train_val_dict_.update(dict_)
+			pickle.dump(train_val_dict_,open(annot_dict_path+'train_val.pickle','wb'),protocol=pickle.HIGHEST_PROTOCOL)
+		print('\n')
 		print('Processing done.')
 		print('Discarded {} mismatches in images and annotations'.format(self.wrong))
-		if store_lmdb:
-			store_lmdb.close()
+		# if store_lmdb:
+		# 	store_lmdb.close()
 
 	def _words_preprocess(self, phrase):
 		""" preprocess a sentence: lowercase, clean up weird chars, remove punctuation """
