@@ -1,7 +1,7 @@
 import xml.etree.cElementTree as etree
 import os, sys, re, pickle, cv2, lmdb, json
 from pycocotools.coco import COCO
-from data.refer import REFER
+from refer import REFER
 
 class Data():
 	def __init__(self):
@@ -352,7 +352,7 @@ class Data():
 		# 	store_lmdb = lmdb_env
 
 		#initialization
-		dataset = 'refclef'
+		dataset = 'refcoco'
 		splitBy = 'unc'
 		refer_obj = REFER(raw_path, dataset, splitBy)
 		img_ids_all = refer_obj.getImgIds()
@@ -367,11 +367,11 @@ class Data():
 
 		dict_ = self._get_dict_refer(refer_obj, img_ids_all, img_ids_split)
 		pickle.dump(dict_,open(annot_dict_path+split+'.pickle','wb'),protocol=pickle.HIGHEST_PROTOCOL)
-		if split=='train':
-			train_val_dict_ = dict_
-		elif split=='val':
-			train_val_dict_.update(dict_)
-			pickle.dump(train_val_dict_,open(annot_dict_path+'train_val.pickle','wb'),protocol=pickle.HIGHEST_PROTOCOL)
+		#if split=='train':
+                #    train_val_dict_ = dict_
+		#elif split=='val':
+                #    train_val_dict_.update(dict_)
+                #    pickle.dump(train_val_dict_,open(annot_dict_path+'train_val.pickle','wb'),protocol=pickle.HIGHEST_PROTOCOL)
 		print('\n')
 		print('Processing done.')
 		print('Discarded {} mismatches in images and annotations'.format(self.wrong))
