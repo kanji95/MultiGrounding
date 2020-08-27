@@ -9,7 +9,8 @@ from scipy import ndimage as ndi
 import tensorflow.contrib.slim as slim
 import sys
 from collections import OrderedDict
-slim_models_path = '/ssd_scratch/cvit/kanishk/models/visual_models/'
+#slim_models_path = '/ssd_scratch/cvit/kanishk/models/visual_models/'
+slim_models_path = './models/visual_models/'
 sys.path.append(slim_models_path)
 
 # bbox generation config

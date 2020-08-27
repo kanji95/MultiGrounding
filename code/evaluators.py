@@ -39,7 +39,7 @@ class gnet_evaluator():
 
         # create dataflow for faster batchgen
         self.gen = BatchData(self.df, self.batch_size)
-        self.gen = MultiProcessRunner(self.gen, num_prefetch=512, num_proc=8)
+        #self.gen = MultiProcessRunner(self.gen, num_prefetch=128, num_proc=2)
         # self.gen.reset_state()
 
         self.gnet_infer = gnet_inference(ckpt_path=self.ckpt_path,
@@ -73,7 +73,9 @@ class gnet_evaluator():
         print_('Initialize Validation')
         for img, txt, annots in self.gen:
             cnt += 1
+            #print_(f'{cnt} interation: Pending Inference!')
             eval_tensors = self.gnet_infer(img, txt, endpoints)
+            #print_(f'{cnt} iteration: eval_tensors: {eval_tensors}')
             qry_heats, qry_scores, sen_score, wrd_idx, sen_idx, lvl_scores = eval_tensors
 
             # checking correctness
@@ -135,8 +137,9 @@ class gnet_evaluator():
                 100.*cnt_correct_hit/cnt_overall, 100.*att_correct/cnt_overall]
             prnt = 'Sample {}/{}, IoU:{:.2f}, Pointing Accucary:{:.2f}, Attention Correctness:{:.2f} \r'.format(
                 var[0], var[1], var[2], var[3], var[4])
-            sys.stdout.write(prnt)
-            sys.stdout.flush()
+            print_(prnt)
+            #sys.stdout.write(prnt)
+            #sys.stdout.flush()
 
         # overall acc
         hit_acc = cnt_correct_hit/cnt_overall

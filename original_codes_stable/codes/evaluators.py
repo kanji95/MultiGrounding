@@ -48,7 +48,7 @@ class gnet_evaluator():
 
         # create dataflow for faster batchgen
         self.gen = BatchData(self.df, self.batch_size)
-        self.gen = MultiProcessRunner(self.gen, num_prefetch=512, num_proc=8)
+        # self.gen = MultiProcessRunner(self.gen, num_prefetch=512, num_proc=8)
         # self.gen.reset_state()
 
         self.gnet_infer = gnet_inference(ckpt_path=self.ckpt_path,
@@ -270,10 +270,10 @@ class ImageTextAnnotBatchGen(RNGDataFlow):
         return nbSamples
 
     def _list_entries(self):
-        lmdb_path = self.data_path['lmdb']
-        lmdb_env = lmdb.open(lmdb_path, map_size=int(
-            1e11), readonly=True, lock=False)
-        self.txn = lmdb_env.begin(write=False)
+        #lmdb_path = self.data_path['lmdb']
+        #lmdb_env = lmdb.open(lmdb_path, map_size=int(
+        #    1e11), readonly=True, lock=False)
+        #self.txn = lmdb_env.begin(write=False)
 
         annt_path = self.data_path['annotations']
         with open(annt_path, 'rb') as f:
