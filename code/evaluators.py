@@ -7,6 +7,9 @@ from gen import ImageTextAnnotBatchGen
 import yaml
 from utils import *
 
+def print_(statement):
+    print(statement, flush=True)
+
 class gnet_evaluator():
 	def __init__(self,
 				 ckpt_path,
@@ -16,14 +19,14 @@ class gnet_evaluator():
 				 gnet_config='./configs/pnas_elmo_3x3.yml',
 				 query_level='referral'):
 
-		print('Initializing evaluator...')
+		print_('Initializing evaluator...')
 		self.gnet_config = yaml.load(open(gnet_config, 'r'))
 		self.img_size = self.gnet_config['image_size']
 		self.gpu = gpu
 		self.data_path = data_path
 		self.ckpt_path = ckpt_path
 		self.batch_size = batch_size
-		print('Initializing generator...')
+		print_('Initializing generator...')
 		# Define batch generator
 		self.df = ImageTextAnnotBatchGen(data_path=self.data_path, 
 										 img_size=self.img_size[:2],
@@ -65,6 +68,7 @@ class gnet_evaluator():
 					 'level_index_sentence',
 					 'level_score_word']
 
+        print_('Initialize Validation')
 		for img,txt,annots in self.gen:
 			cnt+=1
 			eval_tensors = self.gnet_infer(img,txt,endpoints)
@@ -80,7 +84,7 @@ class gnet_evaluator():
 					query = annot['query']
 					idx = annot['idx']
 					if len(query.split())==0 or len(idx)==0:
-						print('query zero')
+						print_('query zero')
 					category = list(annot['category'])
 					#skip non-groundable queries
 					if 'notvisual' in category or len(annot['bbox_norm'])==0:
@@ -173,7 +177,7 @@ class gnet_inference():
 
 		self.saver = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='GroundNet'))
 
-		print('Restoring variables from checkpoint...')
+		print_('Restoring variables from checkpoint...')
 		self.sess.run([tf.initialize_all_tables(),tf.initialize_all_variables()])
 		self.saver.restore(self.sess, self.ckpt_path)
 
