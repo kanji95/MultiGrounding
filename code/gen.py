@@ -184,6 +184,9 @@ class ImageTextAnnotBatchGen(RNGDataFlow):
 
                 img_path = self.annotations[entry]['img_path']
                 img = Image.open(img_path)
+                if img.mode == 'L':
+                    img = img.convert(mode='RGB')
+                img = np.array(img.resize(self.img_size))
 
                 if self.per_sen_qry:
                     # return unique sentence with all annotations available
@@ -200,3 +203,4 @@ class ImageTextAnnotBatchGen(RNGDataFlow):
                         annot = np.array([annot_entity])
                         # each query is a simple referral expression, paired witth only one annotation
                         yield [img, sen, annot]
+            break
