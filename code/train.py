@@ -4,7 +4,7 @@ from trainers import gnet_trainer, gnet_trainer_distributed
 path_dict = {'lmdb': '../data/saved/vg/images.lmdb',
              'annotations': '../data/saved/vg/annotations/train.pickle'}
 
-trainer = gnet_trainer_distributed(data_path = path_dict,
+trainer = gnet_trainer_distributed(data_path=path_dict,
                                    gpu='2,3',
                                    batch_size=32,
                                    lr=0.0001,
@@ -15,4 +15,4 @@ trainer = gnet_trainer_distributed(data_path = path_dict,
                                    gnet_config='./configs/pnas_elmo_1x1.yml',
                                    log_step=2000)
 
-trainer.train(epochs=10,ckpt_path='./models/groundnet_pnas_elmo_1x1_vg')
+trainer.train(epochs=10, ckpt_path='./models/groundnet_pnas_elmo_1x1_vg')
