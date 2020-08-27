@@ -70,8 +70,8 @@ class gnet_evaluator():
                                  'level_index_sentence',
                                  'level_score_word']
 
-    print_('Initialize Validation')
-       for img, txt, annots in self.gen:
+        print_('Initialize Validation')
+        for img, txt, annots in self.gen:
             cnt += 1
             eval_tensors = self.gnet_infer(img, txt, endpoints)
             qry_heats, qry_scores, sen_score, wrd_idx, sen_idx, lvl_scores = eval_tensors
